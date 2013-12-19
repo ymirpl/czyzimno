@@ -1,0 +1,92 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CzyPiździ.pl</title>
+    <link rel="stylesheet" href="css/foundation.css" />
+    <style type="text/css">
+      .wait {
+        color: #ccc;
+        font-style: italic;
+      }
+    </style>
+    <script src="js/modernizr.js"></script>
+  </head>
+  <body>
+    
+    <div class="row">
+      <div class="large-12 columns">
+        <h1 class="text-center">Czy pizga na dworze?</h1>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="large-12 columns">
+      	<div class="panel">
+	        <h1>W <span class="place wait" id="place">czekaj</span> <span class="cold wait" id="cold">czekaj</span></h1>
+      	</div>
+      </div>
+    </div>
+
+    
+    <script src="js/jquery.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      $(document).ready(function() {
+
+        function coldTranslation(temp) {
+          console.log(temp);
+          tempInt = parseInt(temp);
+          if (tempInt < 0) {
+            return "mróz! " + temp;
+          }
+          else if (tempInt > 0) {
+            return "nie pizga. "
+          }
+          else if (tempInt < -15) {
+            return "piżdzi! " + temp; 
+          }
+
+        }
+
+        function getWeather(lat, lon) {
+            $.ajax({
+              url: "http://api.openweathermap.org/data/2.5/find?lat=" + lat + "&lon=" + lon +"&units=metric", 
+              dataType: "jsonp", 
+              success: function(data) {
+                console.log(data);
+                $('#place').html(data['list'][0].name);
+                $('#cold').html(coldTranslation(data['list'][0]['main']['temp']));
+                $('#place').removeClass('wait');
+                $('#cold').removeClass('wait');
+              }
+            });
+        }
+
+        var lat, lon;
+        lat = 52.259;
+        lon = 21.020;
+
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            lat = position.coords.latitude;
+            lon = position.coords.longitude;
+            getWeather(lat, lon);
+          }, 
+          function(error){
+              console.log(error.message);
+              getWeather(lat, lon);
+          }, {
+              enableHighAccuracy: true
+              ,timeout : 5000
+          });
+        } else {
+          getWeather(lat, lon);
+        }
+      });
+      // http://api.openweathermap.org/data/2.5/find?lat=52.259&lon=21.020&units=metric
+    </script>
+  </body>
+</html>
